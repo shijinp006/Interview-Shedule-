@@ -1,0 +1,21 @@
+{
+  "name": "micro-ats",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:api": "pnpm --filter @micro-ats/api dev",
+    "dev:web": "pnpm --filter @micro-ats/web dev",
+    "build": "pnpm --filter @micro-ats/web build",
+    "seed": "pnpm --filter @micro-ats/api seed",
+    "typecheck": "pnpm -r typecheck",
+    "mongo:up": "docker compose up -d",
+    "mongo:down": "docker compose down",
+    "mongo:logs": "docker compose logs -f mongo"
+  }
+}
