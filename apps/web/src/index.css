@@ -1,0 +1,152 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---- Blueprint console: cool paper, ink navy, amber "now" ---- */
+:root {
+  --radius: 0.5rem;
+
+  --background: #f1f4f9;
+  --foreground: #16233b;
+
+  --card: #ffffff;
+  --card-foreground: #16233b;
+  --popover: #ffffff;
+  --popover-foreground: #16233b;
+
+  --primary: #1b2a47;
+  --primary-foreground: #f4f7fc;
+
+  --secondary: #e6ebf3;
+  --secondary-foreground: #1b2a47;
+
+  --muted: #e9edf4;
+  --muted-foreground: #5c6b85;
+
+  --accent: #e2e8f2;
+  --accent-foreground: #1b2a47;
+
+  --destructive: #c63b57;
+
+  --border: #d8dfea;
+  --input: #d2dae7;
+  --ring: #47608f;
+
+  /* Signature accent — reserved for "now" / live indicators only. */
+  --signal: #e0892b;
+  --signal-foreground: #2c1e0c;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #16233b;
+  --sidebar-primary: #1b2a47;
+  --sidebar-primary-foreground: #f4f7fc;
+  --sidebar-accent: #e6ebf3;
+  --sidebar-accent-foreground: #1b2a47;
+  --sidebar-border: #d8dfea;
+  --sidebar-ring: #47608f;
+}
+
+.dark {
+  --background: #0e1626;
+  --foreground: #e7ecf5;
+
+  --card: #16233b;
+  --card-foreground: #e7ecf5;
+  --popover: #16233b;
+  --popover-foreground: #e7ecf5;
+
+  --primary: #dbe3f2;
+  --primary-foreground: #16233b;
+
+  --secondary: #22314f;
+  --secondary-foreground: #e7ecf5;
+
+  --muted: #22314f;
+  --muted-foreground: #9aa8c4;
+
+  --accent: #26365a;
+  --accent-foreground: #e7ecf5;
+
+  --destructive: #e0526e;
+
+  --border: #26365a;
+  --input: #2b3d63;
+  --ring: #6b84b4;
+
+  --signal: #eaa146;
+  --signal-foreground: #2c1e0c;
+
+  --sidebar: #16233b;
+  --sidebar-foreground: #e7ecf5;
+  --sidebar-primary: #dbe3f2;
+  --sidebar-primary-foreground: #16233b;
+  --sidebar-accent: #22314f;
+  --sidebar-accent-foreground: #e7ecf5;
+  --sidebar-border: #26365a;
+  --sidebar-ring: #6b84b4;
+}
+
+@theme inline {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: "Space Grotesk Variable", "IBM Plex Sans", sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-signal: var(--signal);
+  --color-signal-foreground: var(--signal-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: color-mix(in oklch, var(--ring) 50%, transparent);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+  /* Every temporal value is monospaced + tabular for scannable alignment. */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "ss01";
+  }
+}
