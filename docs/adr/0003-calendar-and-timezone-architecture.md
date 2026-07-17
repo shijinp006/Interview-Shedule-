@@ -1,4 +1,4 @@
-# Vendored Origin UI event-calendar; timezone owned at the boundary
+# Vendored Origin UI time-grid; product seam is InterviewCalendar
 
 ## Status
 
@@ -17,29 +17,35 @@ first-class IANA timezone support.
 
 ## Decision
 
-Vendor **Origin UI `event-calendar`** (MIT, copy-paste source) as the calendar.
-It is the only option that is simultaneously native shadcn, a real day/week
-time-grid, **controlled by props** (`events` in; `onEventAdd/Update/Delete`
-callbacks out), and on date-fns v4.
+Vendor **Origin UI `event-calendar`** (MIT, copy-paste source) as a **private
+time-grid adapter** under `components/event-calendar`. Strip its generic event
+CRUD (`EventDialog`, client-side event store) so the adapter only speaks:
 
-Own timezone conversion **at the boundary**, not inside the component:
+- `events` in (viewer-local wall-clock `Date`s)
+- `onViewportChange` / `onSlotSelect` / `onEventSelect` / `onEventMove` out
+
+The **product seam** is `InterviewCalendar` in `features/scheduling`:
+
+- Owns viewport-driven Interview fetching, `TimezoneBridge`, Interview↔event
+  mapping, DnD reschedule + conflict toasts, and schedule/actions dialogs.
+- `CalendarPage` only selects an Interviewer.
+
+Own timezone conversion **at the InterviewCalendar boundary**, not inside the
+grid:
 
 - The server stores and returns UTC.
-- The client converts UTC → the viewer's local zone with **date-fns + date-fns-tz**
-  before handing events to the calendar, so the component only ever sees
-  wall-clock local times and needs no tz awareness.
-- The calendar's create/edit/delete callbacks are where booking calls
-  (`POST /api/schedule`) and 409 handling live.
+- The feature converts UTC → viewer-local before handing events to the grid.
+- Slot/move callbacks convert viewer-local `Date`s back to UTC ISO for the API.
 
-Standardize the whole frontend on **date-fns + date-fns-tz** (dropping the
-earlier Luxon pick) so there is a single date library, matching the vendored
-component.
+Standardize the whole frontend on **date-fns + date-fns-tz**.
 
 ## Consequences
 
 - The component is self-labeled "early alpha / not for production." Because it is
-  vendored as source, we own it: pin it, and harden the parts we use.
-- Because we own tz conversion, the component's lack of tz support is a non-issue.
+  vendored as source, we own it: pin it, and harden only the parts we use.
+- A dual generic/product path inside the grid is rejected — product concerns
+  stay in `InterviewCalendar`.
+- Layout/snap math (`positionTimedEvents`, `snapToQuarterHour`) lives once in
+  the adapter and is shared by day/week/DnD.
 - If the alpha proves too rough, the battle-tested fallback is react-big-calendar
-  (controlled `events` + `onSelectSlot`/`onEventDrop`/`onEventResize`), at the
-  cost of a Moment localizer and non-native shadcn styling.
+  behind the same `InterviewCalendar` seam.

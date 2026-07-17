@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { idSchema, isoUtcSchema } from "./fields";
 
 export const conflictPartySchema = z.enum(["interviewer", "candidate"]);
 export type ConflictParty = z.infer<typeof conflictPartySchema>;
@@ -6,11 +7,11 @@ export type ConflictParty = z.infer<typeof conflictPartySchema>;
 /** Detail attached to a 409 so the UI can name who is already booked. */
 export const conflictDetailSchema = z.object({
   party: conflictPartySchema,
-  interviewId: z.string(),
-  candidateName: z.string(),
-  interviewerName: z.string(),
-  start: z.string(),
-  end: z.string(),
+  interviewId: idSchema,
+  candidateName: z.string().min(1),
+  interviewerName: z.string().min(1),
+  start: isoUtcSchema,
+  end: isoUtcSchema,
 });
 export type ConflictDetail = z.infer<typeof conflictDetailSchema>;
 
@@ -22,7 +23,7 @@ export const apiErrorSchema = z.object({
     details: z.unknown().optional(),
   }),
 });
-export type ApiError = z.infer<typeof apiErrorSchema>;
+export type ApiErrorBody = z.infer<typeof apiErrorSchema>;
 
 /** Machine-readable error codes used across the API. */
 export const ERROR_CODES = {

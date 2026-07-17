@@ -92,7 +92,13 @@ export function CandidateFormDialog({
           </div>
           <div className="space-y-1.5">
             <Label>Stage</Label>
-            <Select value={stage} onValueChange={(v) => setStage(v as Stage)}>
+            <Select
+              value={stage}
+              onValueChange={(v) => {
+                const next = STAGES.find((s) => s === v);
+                if (next) setStage(next);
+              }}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>

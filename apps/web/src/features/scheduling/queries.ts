@@ -1,9 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Interview, ScheduleInput, RescheduleInput } from "@micro-ats/shared";
+import {
+  interviewResponseSchema,
+  type ScheduleInput,
+  type RescheduleInput,
+} from "@micro-ats/shared";
+import { z } from "zod";
 import { api } from "@/lib/api";
 
 export const interviewsKey = (params?: Record<string, string>) =>
   ["interviews", params ?? {}] as const;
+
+const listSchema = z.array(interviewResponseSchema);
 
 export function useInterviews(params: {
   interviewerId?: string;
@@ -15,8 +22,8 @@ export function useInterviews(params: {
   ).toString();
   return useQuery({
     queryKey: interviewsKey(params as Record<string, string>),
-    queryFn: () => api.get<Interview[]>(`/api/interviews?${search}`),
-    enabled: Boolean(params.interviewerId),
+    queryFn: () => api.get(`/api/interviews?${search}`, listSchema),
+    enabled: Boolean(params.interviewerId && params.from && params.to),
   });
 }
 
@@ -27,7 +34,8 @@ function invalidateInterviews(qc: ReturnType<typeof useQueryClient>) {
 export function useSchedule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: ScheduleInput) => api.post<Interview>("/api/schedule", input),
+    mutationFn: (input: ScheduleInput) =>
+      api.post("/api/schedule", input, interviewResponseSchema),
     onSuccess: () => invalidateInterviews(qc),
   });
 }
@@ -36,7 +44,7 @@ export function useReschedule() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: RescheduleInput }) =>
-      api.patch<Interview>(`/api/interviews/${id}/reschedule`, input),
+      api.patch(`/api/interviews/${id}/reschedule`, input, interviewResponseSchema),
     onSuccess: () => invalidateInterviews(qc),
   });
 }
@@ -44,7 +52,8 @@ export function useReschedule() {
 export function useCancelInterview() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => api.patch<Interview>(`/api/interviews/${id}/cancel`),
+    mutationFn: (id: string) =>
+      api.patch(`/api/interviews/${id}/cancel`, undefined, interviewResponseSchema),
     onSuccess: () => invalidateInterviews(qc),
   });
 }
@@ -52,7 +61,8 @@ export function useCancelInterview() {
 export function useCompleteInterview() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => api.patch<Interview>(`/api/interviews/${id}/complete`),
+    mutationFn: (id: string) =>
+      api.patch(`/api/interviews/${id}/complete`, undefined, interviewResponseSchema),
     onSuccess: () => invalidateInterviews(qc),
   });
 }
@@ -60,7 +70,7 @@ export function useCompleteInterview() {
 export function useDeleteInterview() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => api.del<void>(`/api/interviews/${id}`),
+    mutationFn: (id: string) => api.del(`/api/interviews/${id}`),
     onSuccess: () => invalidateInterviews(qc),
   });
 }

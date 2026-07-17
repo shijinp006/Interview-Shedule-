@@ -3,7 +3,8 @@ import { formatInTimeZone } from "date-fns-tz";
 /**
  * Half-open overlap: two windows `[aStart, aEnd)` and `[bStart, bEnd)` overlap
  * iff `aStart < bEnd && bStart < aEnd`. Back-to-back windows (aEnd == bStart) do
- * NOT overlap. Pure — no I/O, exhaustively testable.
+ * NOT overlap. Pure — no I/O. The Mongo overlap filter in scheduling.service
+ * (`start: { $lt: end }, end: { $gt: start }`) is the query adapter of this rule.
  */
 export function windowsOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date): boolean {
   return aStart < bEnd && bStart < aEnd;
@@ -26,8 +27,7 @@ export interface Check {
  * not in the past, and within min/max duration.
  */
 export function validateWindow(
-  start: Date,
-  end: Date,
+  start: Date, end: Date,
   opts: { minMinutes: number; maxMinutes: number; now?: Date },
 ): Check {
   const now = opts.now ?? new Date();

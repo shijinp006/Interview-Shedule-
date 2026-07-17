@@ -22,7 +22,7 @@ import {
   useReschedule,
 } from "./queries";
 
-export function EventActionsDialog({
+export function InterviewActionsDialog({
   open,
   onOpenChange,
   interview,

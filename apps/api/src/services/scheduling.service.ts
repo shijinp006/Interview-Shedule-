@@ -52,6 +52,7 @@ async function findOverlap(
     [field]: id,
     status: { $in: BLOCKING_STATUSES },
     // half-open overlap: existing.start < newEnd && newStart < existing.end
+    // (matches windowsOverlap in overlap.ts)
     start: { $lt: end },
     end: { $gt: start },
   };
@@ -83,6 +84,60 @@ function buildConflict(party: ConflictParty, overlap: PopulatedInterview): Confl
   return new ConflictError(message, ERROR_CODES.INTERVIEW_CONFLICT, detail);
 }
 
+/**
+ * Serialize on both parties' bookingSeq, then enforce working hours and the
+ * dual-party no-overlap invariant. Shared by schedule and reschedule.
+ */
+async function assertBookable(
+  session: ClientSession,
+  opts: {
+    interviewerId: Types.ObjectId | string;
+    candidateId: Types.ObjectId | string;
+    start: Date;
+    end: Date;
+    excludeId?: Types.ObjectId;
+  },
+): Promise<{ interviewer: InterviewerDoc; candidate: CandidateDoc }> {
+  const interviewer = await Interviewer.findOneAndUpdate(
+    { _id: opts.interviewerId },
+    { $inc: { bookingSeq: 1 } },
+    { session, new: true },
+  );
+  if (!interviewer) throw new NotFoundError("Interviewer not found");
+
+  const candidate = await Candidate.findOneAndUpdate(
+    { _id: opts.candidateId },
+    { $inc: { bookingSeq: 1 } },
+    { session, new: true },
+  );
+  if (!candidate) throw new NotFoundError("Candidate not found");
+
+  const wh = withinWorkingHours(opts.start, opts.end, interviewer);
+  if (!wh.ok) throw new ValidationError(wh.reason ?? "Outside working hours");
+
+  const iOverlap = await findOverlap(
+    "interviewer",
+    interviewer._id,
+    opts.start,
+    opts.end,
+    session,
+    opts.excludeId,
+  );
+  if (iOverlap) throw buildConflict("interviewer", iOverlap);
+
+  const cOverlap = await findOverlap(
+    "candidate",
+    candidate._id,
+    opts.start,
+    opts.end,
+    session,
+    opts.excludeId,
+  );
+  if (cOverlap) throw buildConflict("candidate", cOverlap);
+
+  return { interviewer, candidate };
+}
+
 async function getInterviewById(id: Types.ObjectId | string) {
   const doc = await Interview.findById(id).populate(["candidate", "interviewer"]);
   if (!doc) throw new NotFoundError("Interview not found");
@@ -98,30 +153,12 @@ export async function scheduleInterview(input: ScheduleInput) {
   try {
     let createdId: Types.ObjectId | undefined;
     await session.withTransaction(async () => {
-      // Bump both parties' bookingSeq FIRST — this is the write-skew guard:
-      // concurrent bookings touching either party collide on a shared document.
-      const interviewer = await Interviewer.findOneAndUpdate(
-        { _id: input.interviewerId },
-        { $inc: { bookingSeq: 1 } },
-        { session, new: true },
-      );
-      if (!interviewer) throw new NotFoundError("Interviewer not found");
-
-      const candidate = await Candidate.findOneAndUpdate(
-        { _id: input.candidateId },
-        { $inc: { bookingSeq: 1 } },
-        { session, new: true },
-      );
-      if (!candidate) throw new NotFoundError("Candidate not found");
-
-      const wh = withinWorkingHours(start, end, interviewer);
-      if (!wh.ok) throw new ValidationError(wh.reason ?? "Outside working hours");
-
-      const iOverlap = await findOverlap("interviewer", interviewer._id, start, end, session);
-      if (iOverlap) throw buildConflict("interviewer", iOverlap);
-
-      const cOverlap = await findOverlap("candidate", candidate._id, start, end, session);
-      if (cOverlap) throw buildConflict("candidate", cOverlap);
+      const { interviewer, candidate } = await assertBookable(session, {
+        interviewerId: input.interviewerId,
+        candidateId: input.candidateId,
+        start,
+        end,
+      });
 
       const [doc] = await Interview.create(
         [
@@ -158,42 +195,13 @@ export async function rescheduleInterview(id: string, input: RescheduleInput) {
         throw new ValidationError("Only scheduled interviews can be rescheduled");
       }
 
-      const interviewer = await Interviewer.findOneAndUpdate(
-        { _id: interview.interviewer },
-        { $inc: { bookingSeq: 1 } },
-        { session, new: true },
-      );
-      if (!interviewer) throw new NotFoundError("Interviewer not found");
-
-      const candidate = await Candidate.findOneAndUpdate(
-        { _id: interview.candidate },
-        { $inc: { bookingSeq: 1 } },
-        { session, new: true },
-      );
-      if (!candidate) throw new NotFoundError("Candidate not found");
-
-      const wh = withinWorkingHours(start, end, interviewer);
-      if (!wh.ok) throw new ValidationError(wh.reason ?? "Outside working hours");
-
-      const iOverlap = await findOverlap(
-        "interviewer",
-        interviewer._id,
+      await assertBookable(session, {
+        interviewerId: interview.interviewer,
+        candidateId: interview.candidate,
         start,
         end,
-        session,
-        interview._id,
-      );
-      if (iOverlap) throw buildConflict("interviewer", iOverlap);
-
-      const cOverlap = await findOverlap(
-        "candidate",
-        candidate._id,
-        start,
-        end,
-        session,
-        interview._id,
-      );
-      if (cOverlap) throw buildConflict("candidate", cOverlap);
+        excludeId: interview._id,
+      });
 
       interview.start = start;
       interview.end = end;

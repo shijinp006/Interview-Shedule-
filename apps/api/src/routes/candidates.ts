@@ -1,6 +1,12 @@
 import express from "express";
-import { candidateCreateSchema, candidateUpdateSchema } from "@micro-ats/shared";
+import {
+  candidateCreateSchema,
+  candidateUpdateSchema,
+  candidateResponseSchema,
+} from "@micro-ats/shared";
+import { z } from "zod";
 import { validateBody } from "../middleware/validate";
+import { sendJson } from "../lib/respond";
 import {
   listCandidates,
   getCandidate,
@@ -9,23 +15,25 @@ import {
   deleteCandidate,
 } from "../services/candidate.service";
 
+const candidatesListSchema = z.array(candidateResponseSchema);
+
 export const candidatesRouter = express.Router();
 
 candidatesRouter.get("/", async (_req, res) => {
-  res.json(await listCandidates());
+  sendJson(res, candidatesListSchema, await listCandidates());
 });
 
 candidatesRouter.get("/:id", async (req, res) => {
-  res.json(await getCandidate(String(req.params.id)));
+  sendJson(res, candidateResponseSchema, await getCandidate(String(req.params.id)));
 });
 
 candidatesRouter.post("/", validateBody(candidateCreateSchema), async (req, res) => {
-  res.status(201).json(await createCandidate(req.body));
+  sendJson(res, candidateResponseSchema, await createCandidate(req.body), 201);
 });
 
-// The dashboard "Status Toggle" is a PATCH { stage } to this endpoint.
+// Stage updates are a PATCH { stage } to this endpoint.
 candidatesRouter.patch("/:id", validateBody(candidateUpdateSchema), async (req, res) => {
-  res.json(await updateCandidate(String(req.params.id), req.body));
+  sendJson(res, candidateResponseSchema, await updateCandidate(String(req.params.id), req.body));
 });
 
 candidatesRouter.delete("/:id", async (req, res) => {

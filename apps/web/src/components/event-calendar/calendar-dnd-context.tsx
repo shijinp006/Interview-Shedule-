@@ -23,7 +23,9 @@ import {
 } from "@dnd-kit/core"
 import { addMinutes, differenceInMinutes } from "date-fns"
 
-import { EventItem, type CalendarEvent } from "@/components/event-calendar"
+import { EventItem } from "./event-item"
+import type { CalendarEvent } from "./types"
+import { snapFractionalHour } from "./layout"
 
 // Define the context type
 type CalendarDndContextType = {
@@ -169,21 +171,9 @@ export function CalendarDndProvider({
     if (over && activeEvent && over.data.current) {
       const { date, time } = over.data.current as { date: Date; time?: number }
 
-      // Update time for week/day views
       if (time !== undefined && activeView !== "month") {
         const newTime = new Date(date)
-
-        // Calculate hours and minutes with 15-minute precision
-        const hours = Math.floor(time)
-        const fractionalHour = time - hours
-
-        // Map to nearest 15 minute interval (0, 0.25, 0.5, 0.75)
-        let minutes = 0
-        if (fractionalHour < 0.125) minutes = 0
-        else if (fractionalHour < 0.375) minutes = 15
-        else if (fractionalHour < 0.625) minutes = 30
-        else minutes = 45
-
+        const { hours, minutes } = snapFractionalHour(time)
         newTime.setHours(hours, minutes, 0, 0)
 
         // Only update if time has changed
@@ -263,18 +253,8 @@ export function CalendarDndProvider({
       // Calculate new start time
       const newStart = new Date(date)
 
-      // If time is provided (for week/day views), set the hours and minutes
       if (time !== undefined) {
-        const hours = Math.floor(time)
-        const fractionalHour = time - hours
-
-        // Map to nearest 15 minute interval (0, 0.25, 0.5, 0.75)
-        let minutes = 0
-        if (fractionalHour < 0.125) minutes = 0
-        else if (fractionalHour < 0.375) minutes = 15
-        else if (fractionalHour < 0.625) minutes = 30
-        else minutes = 45
-
+        const { hours, minutes } = snapFractionalHour(time)
         newStart.setHours(hours, minutes, 0, 0)
       } else {
         // For month view, preserve the original time from currentTime
@@ -308,8 +288,8 @@ export function CalendarDndProvider({
           end: newEnd,
         })
       }
-    } catch (error) {
-      console.error("Error in drag end handler:", error)
+    } catch {
+      // Drop failed — reset state in finally
     } finally {
       // Always reset state
       setActiveEvent(null)

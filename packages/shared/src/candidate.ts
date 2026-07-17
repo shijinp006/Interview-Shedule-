@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { stageSchema } from "./enums";
+import { idSchema, isoUtcSchema } from "./fields";
 
 const candidateFields = {
   name: z.string().trim().min(1, "Name is required").max(120),
@@ -11,12 +12,12 @@ export const candidateCreateSchema = z.object(candidateFields);
 export const candidateUpdateSchema = z.object(candidateFields).partial();
 
 export const candidateResponseSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  email: z.string().optional(),
+  id: idSchema,
+  name: candidateFields.name,
+  email: z.email().optional(),
   stage: stageSchema,
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: isoUtcSchema,
+  updatedAt: isoUtcSchema,
 });
 
 export type CandidateCreateInput = z.infer<typeof candidateCreateSchema>;

@@ -4,12 +4,10 @@ import { useMemo } from "react"
 import { RiCalendarEventLine } from "@remixicon/react"
 import { addDays, format, isToday } from "date-fns"
 
-import {
-  AgendaDaysToShow,
-  CalendarEvent,
-  EventItem,
-  getAgendaEventsForDay,
-} from "@/components/event-calendar"
+import { AgendaDaysToShow } from "./constants"
+import { EventItem } from "./event-item"
+import type { CalendarEvent } from "./types"
+import { getAgendaEventsForDay } from "./utils"
 
 interface AgendaViewProps {
   currentDate: Date
@@ -22,23 +20,18 @@ export function AgendaView({
   events,
   onEventSelect,
 }: AgendaViewProps) {
-  // Show events for the next days based on constant
-  const days = useMemo(() => {
-    console.log("Agenda view updating with date:", currentDate.toISOString())
-    return Array.from({ length: AgendaDaysToShow }, (_, i) =>
-      addDays(new Date(currentDate), i)
-    )
-  }, [currentDate])
+  const days = useMemo(
+    () => Array.from({ length: AgendaDaysToShow }, (_, i) => addDays(new Date(currentDate), i)),
+    [currentDate],
+  )
 
   const handleEventClick = (event: CalendarEvent, e: React.MouseEvent) => {
     e.stopPropagation()
-    console.log("Agenda view event clicked:", event)
     onEventSelect(event)
   }
 
-  // Check if there are any days with events
   const hasEvents = days.some(
-    (day) => getAgendaEventsForDay(events, day).length > 0
+    (day) => getAgendaEventsForDay(events, day).length > 0,
   )
 
   return (
@@ -49,15 +42,14 @@ export function AgendaView({
             size={32}
             className="text-muted-foreground/50 mb-2"
           />
-          <h3 className="text-lg font-medium">No events found</h3>
+          <h3 className="text-lg font-medium">No interviews found</h3>
           <p className="text-muted-foreground">
-            There are no events scheduled for this time period.
+            There are no interviews scheduled for this time period.
           </p>
         </div>
       ) : (
         days.map((day) => {
           const dayEvents = getAgendaEventsForDay(events, day)
-
           if (dayEvents.length === 0) return null
 
           return (

@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils"
 import {
   getBorderRadiusClasses,
   getEventColorClasses,
-  type CalendarEvent,
-} from "@/components/event-calendar"
+} from "./utils"
+import type { CalendarEvent } from "./types"
 
 // Using date-fns format with custom formatting:
 // 'h' - hours (1-12)

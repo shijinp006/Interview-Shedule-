@@ -1,12 +1,11 @@
-import {
-  ERROR_CODES,
-  type InterviewerCreateInput,
-  type InterviewerUpdateInput,
+import type {
+  InterviewerCreateInput,
+  InterviewerUpdateInput,
 } from "@micro-ats/shared";
 import { Interviewer } from "../models/Interviewer";
-import { Interview } from "../models/Interview";
-import { ConflictError, NotFoundError } from "../errors";
+import { NotFoundError } from "../errors";
 import { toInterviewerResponse } from "./mappers";
+import { rejectIfFutureInterviews } from "./future-interviews";
 
 export async function listInterviewers() {
   const docs = await Interviewer.find().sort({ name: 1 });
@@ -34,17 +33,7 @@ export async function updateInterviewer(id: string, input: InterviewerUpdateInpu
 }
 
 export async function deleteInterviewer(id: string) {
-  const future = await Interview.exists({
-    interviewer: id,
-    status: "Scheduled",
-    start: { $gte: new Date() },
-  });
-  if (future) {
-    throw new ConflictError(
-      "Interviewer has upcoming scheduled interviews — cancel them first",
-      ERROR_CODES.HAS_FUTURE_INTERVIEWS,
-    );
-  }
+  await rejectIfFutureInterviews("interviewer", id);
   const doc = await Interviewer.findByIdAndDelete(id);
   if (!doc) throw new NotFoundError("Interviewer not found");
 }

@@ -1,35 +1,17 @@
 import { z } from "zod";
-import { weekdaySchema } from "./enums";
-
-/** `HH:mm` 24-hour time-of-day, e.g. "09:00", "17:30". */
-export const timeOfDaySchema = z
-  .string()
-  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Must be HH:mm (24-hour)");
-
-/** A valid IANA time zone identifier (e.g. "America/New_York"). */
-export const ianaTimeZoneSchema = z.string().refine(
-  (tz) => {
-    try {
-      new Intl.DateTimeFormat("en-US", { timeZone: tz });
-      return true;
-    } catch {
-      return false;
-    }
-  },
-  { message: "Invalid IANA time zone" },
-);
+import {
+  idSchema,
+  ianaTimeZoneSchema,
+  isoUtcSchema,
+  timeOfDaySchema,
+  workingDaysSchema,
+} from "./fields";
 
 const interviewerFields = {
   name: z.string().trim().min(1, "Name is required").max(120),
   email: z.email().optional(),
   timeZone: ianaTimeZoneSchema,
-  workingDays: z
-    .array(weekdaySchema)
-    .min(1, "Pick at least one working day")
-    .max(7)
-    .refine((days) => new Set(days).size === days.length, {
-      message: "Working days must be unique",
-    }),
+  workingDays: workingDaysSchema,
   workStart: timeOfDaySchema,
   workEnd: timeOfDaySchema,
 };
@@ -47,15 +29,15 @@ export const interviewerUpdateSchema = interviewerBase.partial().refine(
 );
 
 export const interviewerResponseSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  email: z.string().optional(),
-  timeZone: z.string(),
-  workingDays: z.array(z.number()),
-  workStart: z.string(),
-  workEnd: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  id: idSchema,
+  name: interviewerFields.name,
+  email: z.email().optional(),
+  timeZone: ianaTimeZoneSchema,
+  workingDays: workingDaysSchema,
+  workStart: timeOfDaySchema,
+  workEnd: timeOfDaySchema,
+  createdAt: isoUtcSchema,
+  updatedAt: isoUtcSchema,
 });
 
 export type InterviewerCreateInput = z.infer<typeof interviewerCreateSchema>;

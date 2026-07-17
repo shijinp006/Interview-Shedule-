@@ -1,12 +1,8 @@
-import {
-  ERROR_CODES,
-  type CandidateCreateInput,
-  type CandidateUpdateInput,
-} from "@micro-ats/shared";
+import type { CandidateCreateInput, CandidateUpdateInput } from "@micro-ats/shared";
 import { Candidate } from "../models/Candidate";
-import { Interview } from "../models/Interview";
-import { ConflictError, NotFoundError } from "../errors";
+import { NotFoundError } from "../errors";
 import { toCandidateResponse } from "./mappers";
+import { rejectIfFutureInterviews } from "./future-interviews";
 
 export async function listCandidates() {
   const docs = await Candidate.find().sort({ createdAt: -1 });
@@ -34,17 +30,7 @@ export async function updateCandidate(id: string, input: CandidateUpdateInput) {
 }
 
 export async function deleteCandidate(id: string) {
-  const future = await Interview.exists({
-    candidate: id,
-    status: "Scheduled",
-    start: { $gte: new Date() },
-  });
-  if (future) {
-    throw new ConflictError(
-      "Candidate has upcoming scheduled interviews — cancel them first",
-      ERROR_CODES.HAS_FUTURE_INTERVIEWS,
-    );
-  }
+  await rejectIfFutureInterviews("candidate", id);
   const doc = await Candidate.findByIdAndDelete(id);
   if (!doc) throw new NotFoundError("Candidate not found");
 }

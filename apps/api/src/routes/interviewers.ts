@@ -1,6 +1,12 @@
 import express from "express";
-import { interviewerCreateSchema, interviewerUpdateSchema } from "@micro-ats/shared";
+import {
+  interviewerCreateSchema,
+  interviewerUpdateSchema,
+  interviewerResponseSchema,
+} from "@micro-ats/shared";
+import { z } from "zod";
 import { validateBody } from "../middleware/validate";
+import { sendJson } from "../lib/respond";
 import {
   listInterviewers,
   getInterviewer,
@@ -9,22 +15,28 @@ import {
   deleteInterviewer,
 } from "../services/interviewer.service";
 
+const interviewersListSchema = z.array(interviewerResponseSchema);
+
 export const interviewersRouter = express.Router();
 
 interviewersRouter.get("/", async (_req, res) => {
-  res.json(await listInterviewers());
+  sendJson(res, interviewersListSchema, await listInterviewers());
 });
 
 interviewersRouter.get("/:id", async (req, res) => {
-  res.json(await getInterviewer(String(req.params.id)));
+  sendJson(res, interviewerResponseSchema, await getInterviewer(String(req.params.id)));
 });
 
 interviewersRouter.post("/", validateBody(interviewerCreateSchema), async (req, res) => {
-  res.status(201).json(await createInterviewer(req.body));
+  sendJson(res, interviewerResponseSchema, await createInterviewer(req.body), 201);
 });
 
 interviewersRouter.patch("/:id", validateBody(interviewerUpdateSchema), async (req, res) => {
-  res.json(await updateInterviewer(String(req.params.id), req.body));
+  sendJson(
+    res,
+    interviewerResponseSchema,
+    await updateInterviewer(String(req.params.id), req.body),
+  );
 });
 
 interviewersRouter.delete("/:id", async (req, res) => {

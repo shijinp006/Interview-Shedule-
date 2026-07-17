@@ -22,7 +22,8 @@ import { ApiError } from "@/lib/api";
 import { useCandidates } from "../candidates/queries";
 import { useSchedule } from "./queries";
 
-export function BookingDialog({
+/** Schedule a new Interview for a fixed Interviewer. */
+export function ScheduleDialog({
   open,
   onOpenChange,
   interviewerId,
@@ -65,15 +66,15 @@ export function BookingDialog({
         start: startAt.toISOString(),
         end: endAt.toISOString(),
       });
-      toast.success("Interview booked");
+      toast.success("Interview scheduled");
       onOpenChange(false);
     } catch (err) {
       if (err instanceof ApiError && err.conflict) {
         toast.error(err.message, {
-          description: `${err.conflict.party} double-booking prevented`,
+          description: `${err.conflict.party} conflict prevented`,
         });
       } else {
-        toast.error(err instanceof Error ? err.message : "Booking failed");
+        toast.error(err instanceof Error ? err.message : "Schedule failed");
       }
     }
   }
@@ -82,7 +83,7 @@ export function BookingDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Book interview</DialogTitle>
+          <DialogTitle>Schedule interview</DialogTitle>
           <DialogDescription>
             With {interviewerName}. Times are in your local timezone.
           </DialogDescription>
@@ -116,7 +117,7 @@ export function BookingDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={schedule.isPending}>
-              Book
+              Schedule
             </Button>
           </DialogFooter>
         </form>

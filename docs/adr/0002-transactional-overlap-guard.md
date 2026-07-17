@@ -41,8 +41,9 @@ serialization guard:
 - Requires a MongoDB replica set (transactions are unavailable on standalone
   mongod). Locally this is a single-node replica set in Docker; in production,
   Atlas or a managed replica set.
-- Bookings for the *same* interviewer are serialized; bookings for *different*
-  interviewers run fully concurrently.
+- Bookings that share an interviewer **or** a candidate are serialized via
+  `bookingSeq`. Bookings for disjoint interviewer+candidate pairs run
+  concurrently.
 - A compound index on `interviews` (interviewer + status + start) keeps the
   overlap query fast.
 
