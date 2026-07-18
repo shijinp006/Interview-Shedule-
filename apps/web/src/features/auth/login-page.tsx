@@ -52,7 +52,12 @@ export function LoginPage() {
       console.log(res, "res");
 
       if (res.error) toast.error(res.error.message ?? "Authentication failed");
+      console.log(res.error?.message);
+
+
     } catch {
+
+
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
