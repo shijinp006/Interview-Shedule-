@@ -7,7 +7,7 @@ import { LoginPage } from "./features/auth/login-page";
 
 export function App() {
   const { data: session, isPending } = authClient.useSession();
-  console.log("asd");
+
 
   return (
     <>

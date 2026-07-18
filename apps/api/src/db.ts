@@ -9,7 +9,7 @@ export async function connectDb(): Promise<void> {
   logger.info("Connected to MongoDB");
 }
 
-console.log("sda");
+
 
 /**
  * The native MongoClient underlying the Mongoose connection — reused by the
