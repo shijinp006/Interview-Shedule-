@@ -30,7 +30,7 @@ export function createApp(auth: Auth) {
   // better-auth catch-all MUST be mounted before express.json() (Express 5
   // named-splat wildcard; the client hangs if the JSON parser runs first).
   app.all("/api/auth/*splat", toNodeHandler(auth));
-  logger.info("auth", auth);
+
 
   // JSON body parser applies only to our own routes below.
   app.use(express.json());
