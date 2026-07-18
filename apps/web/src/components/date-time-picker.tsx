@@ -14,9 +14,12 @@ import {
 export function DateTimePicker({
   value,
   onChange,
+  fromDate,
 }: {
   value: Date;
   onChange: (d: Date) => void;
+  /** When set, dates before this are disabled in the calendar. */
+  fromDate?: Date;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -34,10 +37,17 @@ export function DateTimePicker({
     onChange(next);
   }
 
+  const isPast = fromDate !== undefined && value < fromDate;
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full justify-start gap-2 font-normal">
+        <Button
+          variant="outline"
+          className={`w-full justify-start gap-2 font-normal${
+            isPast ? " border-destructive text-destructive" : ""
+          }`}
+        >
           <CalendarIcon className="size-4 opacity-70" />
           <span className="font-mono text-sm">{format(value, "EEE, MMM d · HH:mm")}</span>
         </Button>
@@ -48,6 +58,7 @@ export function DateTimePicker({
           selected={value}
           onSelect={setDatePart}
           defaultMonth={value}
+          disabled={fromDate ? { before: fromDate } : undefined}
           autoFocus
         />
         <div className="flex items-center gap-2 border-t p-3">

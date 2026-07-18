@@ -58,6 +58,10 @@ export function InterviewActionsDialog({
 
   async function onReschedule(e: FormEvent) {
     e.preventDefault();
+    if (startAt <= new Date()) {
+      toast.error("Start time must be in the future");
+      return;
+    }
     if (endAt <= startAt) {
       toast.error("End must be after start");
       return;
@@ -115,8 +119,8 @@ export function InterviewActionsDialog({
           <form onSubmit={onReschedule} className="space-y-3">
             <Label className="text-xs tracking-wide uppercase">Reschedule</Label>
             <div className="space-y-2">
-              <DateTimePicker value={startAt} onChange={setStartAt} />
-              <DateTimePicker value={endAt} onChange={setEndAt} />
+              <DateTimePicker value={startAt} onChange={setStartAt} fromDate={new Date()} />
+              <DateTimePicker value={endAt} onChange={setEndAt} fromDate={startAt} />
             </div>
             <Button type="submit" size="sm" disabled={reschedule.isPending}>
               Save new time

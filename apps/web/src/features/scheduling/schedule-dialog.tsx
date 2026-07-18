@@ -39,8 +39,9 @@ export function ScheduleDialog({
   const { data: candidates } = useCandidates();
   const schedule = useSchedule();
   const [candidateId, setCandidateId] = useState("");
-  const [startAt, setStartAt] = useState<Date>(new Date());
-  const [endAt, setEndAt] = useState<Date>(new Date());
+  const [startAt, setStartAt] = useState<Date>(() => new Date());
+  const [endAt, setEndAt] = useState<Date>(() => new Date());
+  const now = new Date();
 
   useEffect(() => {
     if (!open || !start) return;
@@ -53,6 +54,10 @@ export function ScheduleDialog({
     e.preventDefault();
     if (!candidateId) {
       toast.error("Pick a candidate");
+      return;
+    }
+    if (startAt <= new Date()) {
+      toast.error("Start time must be in the future");
       return;
     }
     if (endAt <= startAt) {
@@ -106,11 +111,11 @@ export function ScheduleDialog({
           </div>
           <div className="space-y-1.5">
             <Label>Start</Label>
-            <DateTimePicker value={startAt} onChange={setStartAt} />
+            <DateTimePicker value={startAt} onChange={setStartAt} fromDate={now} />
           </div>
           <div className="space-y-1.5">
             <Label>End</Label>
-            <DateTimePicker value={endAt} onChange={setEndAt} />
+            <DateTimePicker value={endAt} onChange={setEndAt} fromDate={startAt} />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
