@@ -7,6 +7,7 @@ import { AppLayout } from "./components/layout";
 import { CalendarPage } from "./features/scheduling/calendar-page";
 import { CandidatesPage } from "./features/candidates/candidates-page";
 import { InterviewersPage } from "./features/interviewers/interviewers-page";
+import { InterviewsPage } from "./features/scheduling/interviews-page";
 
 const rootRoute = createRootRoute({ component: AppLayout });
 
@@ -28,10 +29,17 @@ const interviewersRoute = createRoute({
   component: InterviewersPage,
 });
 
+const interviewsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/interviews",
+  component: InterviewsPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   candidatesRoute,
   interviewersRoute,
+  interviewsRoute,
 ]);
 
 export const router = createRouter({ routeTree });

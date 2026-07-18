@@ -27,6 +27,13 @@ export function useInterviews(params: {
   });
 }
 
+export function useAllInterviews() {
+  return useQuery({
+    queryKey: interviewsKey({}),
+    queryFn: () => api.get("/api/interviews", listSchema),
+  });
+}
+
 function invalidateInterviews(qc: ReturnType<typeof useQueryClient>) {
   return qc.invalidateQueries({ queryKey: ["interviews"] });
 }

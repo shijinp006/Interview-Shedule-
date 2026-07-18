@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { CalendarDays, Users, UserCog, LogOut } from "lucide-react";
+import { CalendarDays, Users, UserCog, LogOut, CalendarCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
@@ -11,6 +11,7 @@ const NAV = [
   { to: "/", label: "Calendar", icon: CalendarDays },
   { to: "/candidates", label: "Candidates", icon: Users },
   { to: "/interviewers", label: "Interviewers", icon: UserCog },
+  { to: "/interviews", label: "Interviews", icon: CalendarCheck },
 ] as const;
 
 function HeaderClock() {
