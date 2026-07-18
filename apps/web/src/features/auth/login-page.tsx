@@ -49,10 +49,10 @@ export function LoginPage() {
         mode === "sign-in"
           ? await authClient.signIn.email({ email, password })
           : await authClient.signUp.email({ email, password, name });
-      console.log(res, "res");
+
 
       if (res.error) toast.error(res.error.message ?? "Authentication failed");
-      console.log(res.error?.message);
+
 
 
     } catch {
