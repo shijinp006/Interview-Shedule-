@@ -16,8 +16,9 @@ export function createAuth(client: MongoClient) {
     baseURL: env.BETTER_AUTH_URL,
     trustedOrigins: [env.WEB_ORIGIN],
     advanced: {
-      crossSubDomainCookies: {
-        enabled: true,
+      defaultCookieAttributes: {
+        sameSite: "none",
+        secure: true,
       },
     },
   });
