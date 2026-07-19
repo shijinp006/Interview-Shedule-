@@ -55,22 +55,23 @@ export function AppLayout() {
             <span className="font-display text-lg font-semibold tracking-tight">Micro-ATS</span>
           </Link>
 
-          <nav className="flex items-center gap-1">
+          <nav className="flex items-center gap-0.5 sm:gap-1">
             {NAV.map(({ to, label, icon: Icon }) => {
               const active = pathname === to;
               return (
                 <Link
                   key={to}
                   to={to}
+                  title={label}
                   className={cn(
-                    "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                    "flex items-center gap-1.5 sm:gap-2 rounded-md px-2 py-1.5 sm:px-3 text-sm font-medium transition-colors",
                     active
                       ? "bg-secondary text-foreground"
                       : "text-muted-foreground hover:text-foreground hover:bg-secondary/60",
                   )}
                 >
                   <Icon className="size-4" />
-                  {label}
+                  <span className="hidden sm:inline">{label}</span>
                 </Link>
               );
             })}

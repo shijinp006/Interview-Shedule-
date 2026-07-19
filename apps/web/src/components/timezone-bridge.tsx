@@ -66,19 +66,19 @@ export function TimezoneBridge({ interviewer }: { interviewer: Interviewer }) {
 
   return (
     <div className="bg-card rounded-lg border">
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 p-4 sm:gap-6">
+      <div className="flex flex-col gap-4 p-4 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-6">
         <Clock eyebrow="You" city={tzCity(viewerTz)} now={now} tz={viewerTz} />
 
-        <div className="flex flex-col items-center gap-1 px-1 text-center">
-          <div className="bg-border h-px w-8 sm:w-16" />
-          <div className="text-muted-foreground font-mono text-[11px] whitespace-nowrap">
+        <div className="flex flex-row sm:flex-col items-center gap-2 sm:gap-1 px-1 text-center justify-center">
+          <div className="bg-border h-px flex-1 sm:flex-none sm:w-16" />
+          <div className="text-muted-foreground font-mono text-[11px] whitespace-nowrap px-2 sm:px-0">
             {deltaLabel(interviewer.timeZone, now)}
           </div>
-          <div className="bg-border h-px w-8 sm:w-16" />
+          <div className="bg-border h-px flex-1 sm:flex-none sm:w-16" />
         </div>
 
-        <div className="flex items-start justify-end gap-3 text-right">
-          <div className="text-right">
+        <div className="flex items-start sm:justify-end gap-3">
+          <div className="text-left sm:text-right">
             <Clock
               eyebrow={interviewer.name.split(" ")[0] ?? "Them"}
               city={tzCity(interviewer.timeZone)}

@@ -51,14 +51,14 @@ export function InterviewersPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Interviewers</h1>
           <p className="text-muted-foreground text-sm">
             Each interviewer has a timezone and working hours.
           </p>
         </div>
-        <Button onClick={openNew}>
+        <Button className="w-full sm:w-auto" onClick={openNew}>
           <Plus className="size-4" /> Add interviewer
         </Button>
       </div>

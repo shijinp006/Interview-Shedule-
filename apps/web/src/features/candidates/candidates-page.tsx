@@ -43,7 +43,7 @@ export function CandidatesPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Candidates</h1>
           <p className="text-muted-foreground text-sm">
@@ -51,6 +51,7 @@ export function CandidatesPage() {
           </p>
         </div>
         <Button
+          className="w-full sm:w-auto"
           onClick={() => {
             setEditing(null);
             setDialogOpen(true);

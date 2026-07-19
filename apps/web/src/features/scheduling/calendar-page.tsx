@@ -19,7 +19,7 @@ export function CalendarPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Calendar</h1>
           <p className="text-muted-foreground text-sm">
@@ -27,7 +27,7 @@ export function CalendarPage() {
             schedule.
           </p>
         </div>
-        <div className="w-64">
+        <div className="w-full sm:w-64">
           <Select value={interviewerId} onValueChange={setInterviewerId}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select an interviewer…" />
